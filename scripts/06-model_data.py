@@ -48,7 +48,7 @@ def linear_mixed_effects_model(train_df):
 
     # Fit the model
     model = MixedLM(
-        endog=train_df['full_bloom_doy'],
+        endog=train_df['days_to_full_bloom'],
         exog=fixed_effects,
         groups=train_df['station_id'],  # Primary random effect
     )
@@ -60,7 +60,7 @@ def linear_mixed_effects_model(train_df):
 
 # Example usage:
 # First ensure your data has all required columns
-required_cols = ['full_bloom_doy', 'flower_doy', 'mean_temp_c', 'latitude', 'longitude', 'station_id']
+required_cols = ['days_to_full_bloom', 'flower_doy', 'mean_temp_c', 'latitude', 'longitude', 'station_id']
 
 # Fit the model
 model_result = linear_mixed_effects_model(train_data)
