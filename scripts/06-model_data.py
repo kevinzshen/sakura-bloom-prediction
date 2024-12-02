@@ -5,11 +5,12 @@
 # Contact: kevinzshen3@gmail.com
 # License: MIT
 
-# Workspace Setup
+### Workspace Setup ###
 import pandas as pd
 import numpy as np
 from statsmodels.regression.mixed_linear_model import MixedLM
 from sklearn.model_selection import train_test_split
+import joblib
 import statsmodels.api as sm
 
 
@@ -63,8 +64,11 @@ def linear_mixed_effects_model(train_df):
 required_cols = ['days_to_full_bloom', 'flower_doy', 'mean_temp_c', 'latitude', 'longitude', 'station_id']
 
 # Fit the model
-model_result = linear_mixed_effects_model(train_data)
+trained_model = linear_mixed_effects_model(train_data)
+
+# Save model into file
+joblib.dump(trained_model, '../models/trained_model.joblib')
 
 # Print summary
-print(model_result.summary())
+print(trained_model.summary())
 
