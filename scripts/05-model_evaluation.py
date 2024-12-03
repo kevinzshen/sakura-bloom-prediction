@@ -76,3 +76,16 @@ plt.ylabel('Latitude')
 plt.title('Prediction Errors by Location')
 plt.savefig('../figures/geographical_errors.png')
 plt.close()
+
+metrics_df = pd.DataFrame({
+    'Metric': ['Root Mean Square Error', 'Mean Absolute Error', 'R-squared'],
+    'Value': [f"{rmse:.2f} days", f"{mae:.2f} days", f"{r2:.3f}"],
+    'Description': [
+        'Average magnitude of prediction errors',
+        'Average absolute prediction error',
+        'Proportion of variance explained by the model'
+    ]
+})
+
+# Save the metrics to a CSV file
+metrics_df.to_csv('../data/03-model_evaluation_data/model_metrics.csv', index=False)
