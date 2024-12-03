@@ -1,5 +1,4 @@
-# Predicting Cherry Blossom Full Bloom Timing in Japan: Geographic Location and Initial Flowering Date Enable Two-Day Accurate
-Forecasts
+# Predicting Cherry Blossom Full Bloom Timing in Japan: Geographic Location and Initial Flowering Date Enable Two-Day Accurate Forecasts
 
 ## Overview
 
