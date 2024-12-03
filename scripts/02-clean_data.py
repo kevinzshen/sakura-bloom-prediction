@@ -4,6 +4,9 @@
 # Date: 30 November 2024
 # Contact: kevinzshen3@gmail.com
 # License: MIT
+# Pre-requisites:
+#  - `pandas` must be installed (pip install pandas)
+#  -  01-download_data.py must have been run
 
 ### Workspace Setup ###
 import pandas as pd

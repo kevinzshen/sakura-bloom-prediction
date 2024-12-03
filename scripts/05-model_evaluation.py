@@ -4,6 +4,14 @@
 # Date: 30 November 2024
 # Contact: kevinzshen3@gmail.com
 # License: MIT
+# Pre-requisites:
+#  - `pandas` must be installed (pip install pandas)
+#  - `numpy` must be installed (pip install numpy)
+#  - `joblib` must be installed (pip install joblib)
+#  - `statsmodels` must be installed (pip install statsmodels)
+#  - `scikit-learn` must be installed (pip install scikit-learn)
+#  - `matplotlib` must be installed (pip install matplotlib)
+#  - `seaborn` must be installed (pip install seaborn)
 
 ### Workspace Setup ###
 import pandas as pd

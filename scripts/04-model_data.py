@@ -4,6 +4,13 @@
 # Date: 30 November 2024
 # Contact: kevinzshen3@gmail.com
 # License: MIT
+# Pre-requisites:
+#  - `pandas` must be installed (pip install pandas)
+#  - `numpy` must be installed (pip install numpy)
+#  - `statsmodels` must be installed (pip install statsmodels)
+#  - `scikit-learn` must be installed (pip install scikit-learn)
+#  - `joblib` must be installed (pip install joblib)
+#  - `requests` must be installed (pip install requests)
 
 ### Workspace Setup ###
 import pandas as pd
@@ -12,7 +19,6 @@ from statsmodels.regression.mixed_linear_model import MixedLM
 from sklearn.model_selection import train_test_split
 import joblib
 import statsmodels.api as sm
-
 
 np.random.seed(2620)
 
