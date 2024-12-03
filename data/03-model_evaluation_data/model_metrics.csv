@@ -1,0 +1,4 @@
+Metric,Value,Description
+Root Mean Square Error,2.72 days,Average magnitude of prediction errors
+Mean Absolute Error,1.97 days,Average absolute prediction error
+R-squared,0.483,Proportion of variance explained by the model
