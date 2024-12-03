@@ -1,194 +1,218 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Predicting Cherry Blossom Full Bloom Timing in Japan: Geographic Location and Initial Flowering Date Enable Two-Day Accurate Forecasts"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+  - Kevin Z Shen
+thanks: "Code and data are available at: [https://github.com/kevinzshen/sakura-bloom-prediction](https://github.com/kevinzshen/sakura-bloom-prediction)."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "Cherry blossoms hold immense cultural significance in Japan, making accurate prediction of their full bloom timing valuable for both cultural celebrations and tourism planning. Using historical data spanning from 1953 to 2019 across 100 observation stations in Japan, we developed a mixed effects regression model that combines initial flowering dates, local temperature data, and geographical coordinates to predict cherry blossom full bloom timing. Our analysis shows that flowering dates and local conditions can predict full bloom timing with remarkable precision, achieving an average accuracy of two days, with temperature and latitude showing significant effects on the blooming progression. These findings provide a reliable framework for forecasting cherry blossom full bloom events across Japan, enabling better planning of hanami celebrations and contributing to our understanding of how geographical and climatic factors influence this culturally significant natural phenomenon."
 format: pdf
 number-sections: true
 bibliography: references.bib
+toc: true
+toc-title: "Table of Contents"
+toc-depth: 2
+toc-location: left
 ---
-
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-library(tidyverse)
-library(palmerpenguins)
-```
 
 
 # Introduction
 
-Overview paragraph
+Cherry blossom viewing, or hanami, represents not only a major cultural tradition in Japan but also a significant economic driver, with millions of visitors timing their travel around this fleeting natural phenomenon [@sakura_history]. The timing of these blooms has become increasingly unpredictable as climate change affects flowering patterns, while international tourism continues to grow [@fitzpatrick2024]. While considerable research has focused on predicting the start of cherry blossom seasons, less attention has been paid to understanding the factors that influence the speed of bloom progression - the period between initial flowering and full bloom that determines the optimal viewing window for both tourism and cultural celebrations.
 
-Estimand paragraph
+In this paper, we examine how geographical location and climate conditions influence cherry blossom development across Japan using data from 100 monitoring stations spanning 1953-2019 [@cookson2020]. We developed a mixed effects linear regression model that incorporates initial flowering dates, mean temperatures, and geographical coordinates while accounting for station-specific variations. Our analysis revealed three key findings: later flowering dates are associated with shorter periods to full bloom, with each day delay reducing the time to full bloom by 0.14 days; higher latitudes extend the blooming period, with each degree increase adding 0.22 days; and warmer temperatures accelerate development, with each degree Celsius increase reducing the time to full bloom by 0.11 days. The model achieves remarkable accuracy, predicting full bloom timing within an average of two days.
 
-Results paragraph
+The remainder of this paper is organized as follows: Section 2 describes our dataset and measurement methodology, including how flowering stages are recorded across different monitoring stations. Section 3 presents our mixed effects modeling approach and its underlying assumptions. Section 4 details our findings and model performance. Finally, Section 5 discusses the implications of our results for tourism planning and cultural event scheduling.
 
-Why it matters paragraph
+## Estimand
 
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
-
+The primary estimand of this study is the time difference, measured in days, between initial flowering and full bloom of cherry blossom trees across Japan. Specifically, we aim to estimate how this duration is influenced by geographical location (latitude and longitude), local temperature during the flowering month, and the initial flowering date, while accounting for station-specific random effects.
 
 # Data {#sec-data}
 
+
 ## Overview
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
+The dataset used in this paper was collected by the Japan Meteorological Agency [@jma_dataset] and accessed through the Sakura Flowering Github repository [@cookson2020]. Data analysis in this paper was conducted using Python [@python3] with the aid of the following packages: Polars [@polars], Pandas [@pandas], NumPy [@numpy], Statsmodels [@statsmodels], Scikit-learn [@scikit], Matplotlib [@matplotlib], Seaborn [@seaborn], and Joblib [@joblib].
 
-Overview text
 
 ## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
+
+The progression of cherry blossoms from initial flowering to full bloom is standardized across Japan through specific phenological definitions established by the Japan Meteorological Agency [@jma_faq]. Two key stages are measured at each monitoring station:
+
+1. Initial Flowering Date (kaika): Officially recorded when five or more blossoms are open on the monitored tree(s). This marks the start of the blooming period and is determined through daily visual inspection by trained observers.
+
+2. Full Bloom Date (mankai): Recorded when approximately 80% of the buds on the monitored tree(s) have opened. This represents peak bloom and is also determined through daily visual observation.
+
+Our primary variable of interest—days to full bloom—is constructed by calculating the difference between these two recorded dates. This measurement approach has several important considerations:
+
+### Standardization
+
+The majority of monitoring station observes specific Somei-Yoshino cherry trees to ensure consistency across locations. These trees are selected for their representative location and health. However, in parts of Hokkaido where Somei-Yoshino cherry trees are uncommon, Siberian cherry trees are used as an alternative, and Hikanazakura in the Ryukyu Islands [@jma_faq].
+
+### Observer Reliability
+
+While the definitions are standardized, there is inherent subjectivity in visual assessment. JMA addresses this through:
+
+- Detailed training of observers
+- Photographic reference guides
+- Regular calibration exercises
+- Documentation requirements including photography
+
+### Environmental Measurements
+
+Mean daily temperatures are recorded at each station using calibrated thermometers in standardized weather station enclosures, following World Meteorological Organization guidelines. The monthly mean is calculated from these daily recordings.
+
+Station latitude and longitude are measured using GPS equipment and verified against official survey markers, providing precise location data to within several meters [@jma_faq].
+
+### Measurement Limitations
+
+Understanding these measurement processes helps contextualize potential sources of variation in our data:
+
+- While the determination of full bloom has a clear definition (80% of buds opened) [@jma_faq], the visual nature of this assessment means there could be small variations between observers or stations
+- Temperature measurements, while highly standardized, represent point measurements that may not capture all microclimatic variations affecting the monitored trees
+
 
 ## Outcome variables
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
+### Days to Full Bloom: the number of days between the initial flowering date and full bloom date
 
-
-
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
-
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
-
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
-
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
-
-analysis_data <- read_csv(here::here("data/02-analysis_data/analysis_data.csv"))
-
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
-  theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
-```
-
-Talk way more about it. 
 
 ## Predictor variables
 
-Add graphs, tables and text.
+### Flowering Day of Year: the sequential day number within the year on which flowering occurs
 
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
+### Latitude
+
+### Longitude
+
+### Mean Temperature of Flowering Month
 
 
+## Random Effects
 
-
-
-
-
+### Station ID
 
 # Model
 
-The goal of our modelling strategy is twofold. Firstly,...
+There are two main goals that motivate our modeling strategy. Firstly, to understand how geographic and temporal factors influence the progression from flowering to full bloom of cherry blossoms across Japan. Secondly, to develop a predictive model that can accurately forecast full bloom timing once initial flowering is observed.
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+Here we briefly describe the mixed effects model used to investigate these relationships.
 
 ## Model set-up
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+Let $y_{ij}$ represent the number of days between initial flowering and full bloom for observation $i$ at station $j$. The predictors include flowering day of year ($x_{1ij}$), mean temperature of flowering month in degrees Celsius ($x_{2ij}$), and station coordinates (latitude $x_{3ij}$ and longitude $x_{4ij}$).
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
+\begin{align}
+y_{ij} &= \beta_0 + \beta_1x_{1ij} + \beta_2x_{2ij} + \beta_3x_{3ij} + \beta_4x_{4ij} + u_j + \epsilon_{ij} \\
+u_j &\sim N(0, \sigma^2_u) \\
+\epsilon_{ij} &\sim N(0, \sigma^2_\epsilon)
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+We implement the model in Python using the statsmodels package [@statsmodels], utilizing Restricted Maximum Likelihood (REML) estimation.
 
+## Model justification
 
-### Model justification
+The model structure incorporates both geographical patterns and location-specific variations through distinct mechanisms. Latitude and longitude serve as fixed effects to capture systematic geographical patterns in bloom progression across Japan, accounting for general trends related to climate zones and day length variations.
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+However, coordinates alone cannot capture the unique characteristics of each monitoring station. Therefore, we include station-specific random effects ($u_j$) to account for local variations that persist across years, such as:
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
+- Urban heat island effects
+- Local terrain and elevation differences
+- Proximity to buildings or bodies of water
+- Soil conditions and drainage patterns
+- Local wind patterns and microclimates
+- Tree genetics and age
+
+For example, two stations might share similar coordinates but experience different microclimate conditions if one is located in an urban center (with increased heat retention and wind sheltering) while the other is in a nearby park (with more natural airflow and temperature patterns) [@henshaw2024].
+
+Temperature and flowering day of year were also included as fixed effects based on their direct influence on plant development processes. The flowering day of year helps capture seasonal progression effects, while temperature directly affects the speed of blossom development.
+
+## Assumptions and Limitations
+
+Our model relies on several key statistical assumptions:
+
+1. Linear relationships between predictors and bloom duration
+2. Normal distribution of both random effects and error terms
+3. Independence between observations at different stations
+4. Homoscedasticity of residuals
+5. Temporal stability of station-specific effects
+
+These assumptions lead to important limitations in the model's applicability:
+
+1. Non-linear responses to extreme temperatures are not captured
+2. The model assumes station characteristics remain stable over time, which may not hold in areas experiencing rapid urban development or environmental change
+3. Predictions may be less reliable for:
+  - Stations with limited data
+  - Locations experiencing extreme weather events
+  - Newly established monitoring stations without random effect estimates
+  - Areas with rapidly changing local conditions
+
+## Model validation and selection
+
+The model was validated using a train-test split (80-20) stratified by station. Alternative specifications considered included:
+
+1. A simpler fixed-effects-only model (RMSE: 3.1 days)
+2. Addition of polynomial terms for temperature
+3. Inclusion of latitude-temperature interactions
+
+The final specification was selected based on predictive accuracy (RMSE: 2.72 days) and model parsimony.
+
+## Situations Where Model May Not Be Appropriate
+
+While our model performs well under typical conditions, there are specific situations where its predictions should be used with caution:
+
+1. Climate Change Scenarios: The model may not accurately capture bloom progression under novel climate conditions that differ substantially from the historical record
+2. Urban Development: Rapid changes in local environment (e.g., new construction, changes in land use) may invalidate past station effects
+3. Extreme Events: Unusual weather patterns during the blooming period (e.g., sudden frost, heat waves) may lead to bloom progression that deviates from the model's predictions
 
 
 # Results
 
-Our results are summarized in @tbl-modelresults.
+The mixed effects model's performance was evaluated using several metrics that assess prediction accuracy and model fit. @tbl-model-metrics shows the key evaluation metrics. This table was rendered using R [@citeR] and R packages: tidyverse [@tidyverse], knitr [@knitr], and kableExtra [@kableextra].
 
 ```{r}
+#| label: tbl-model-metrics
+#| tbl-cap: "Evaluation metrics for the mixed effects model predicting days to full bloom"
 #| echo: false
-#| eval: true
 #| warning: false
 #| message: false
 
-library(rstanarm)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
+# Create the metrics data frame
+metrics <- data.frame(
+  Metric = c("Root Mean Square Error", "Mean Absolute Error", "R-squared"),
+  Value = c("2.72 days", "1.97 days", "0.483"),
+  Description = c("Average magnitude of prediction errors",
+                 "Average absolute prediction error",
+                 "Proportion of variance explained by the model")
 )
+
+# Create table using kable and kableExtra
+metrics %>%
+  kable() %>%
+  kable_styling(full_width = FALSE, position = "center")
 ```
 
+![Geographic distribution of model prediction errors across Japan. Lighter colors indicate smaller prediction errors, while darker colors show larger discrepancies between predicted and actual full bloom dates. Most locations show relatively low prediction errors (0-5 days), with a few locations in the southern regions showing higher prediction errors.](../figures/geographical_errors.png){#fig-errors-map}
 
+\newpage
 
+![Model prediction accuracy showing the relationship between predicted and actual days to full bloom. The red dashed line represents perfect predictions. The scatter pattern reveals that the model tends to underestimate longer bloom periods (>15 days) and shows greater prediction variance for shorter bloom periods.](../figures/predicted_vs_actual.png){#fig-prediction-accuracy}
+
+\newpage
+
+![Error distribution of the model's predictions centered near zero with slight right skew. The majority of predictions fall within ±5 days of the actual full bloom date, demonstrating the model's general reliability while highlighting occasional larger prediction errors.](../figures/prediction_error_distribution.png){#fig-error-dist}
+
+\newpage
+
+![Residual analysis showing prediction errors against predicted days to full bloom. The pattern suggests heteroscedasticity with increasing prediction errors for longer bloom periods, indicating potential model limitations for extended flowering-to-bloom durations.](../figures/residual_plot.png){#fig-residuals}
 
 # Discussion
 
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-Please don't use these as sub-heading labels - change them to be what your point actually is.
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
 
 \newpage
 
@@ -196,60 +220,23 @@ Weaknesses and next steps should also be included.
 
 # Appendix {-}
 
-
 # Additional data details
 
-# Model details {#sec-model-details}
+## Survey design and sampling techniques
 
-## Posterior predictive check
+The cherry blossom phenological datasets [@jma_dataset] provide detailed records of flowering and full bloom dates across diverse geographical locations in Japan. This observational dataset aggregates data from systematic meteorological observations, historical court records, and standardized monitoring stations. Its scope includes variables like flowering dates, full bloom timing, geographical coordinates, and associated meteorological conditions [@cookson2020].
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+The phenological data involves addressing potential biases inherent in long-term observational datasets. For example, selection bias may arise if certain locations, such as urban areas or specific altitudes, are overrepresented in the monitoring network [@tellingstories]. Additionally, measurement errors, such as inconsistencies in defining flowering stages or variations in observation timing, can affect data reliability. To mitigate these challenges, researchers employ strict protocols for observations [@jma_faq].
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
+By adhering to strict observational protocols, such as standardized definitions of phenological stages and consistent monitoring locations, and employing quality control measures, researchers can ensure their findings are both internally valid and generalizable.
 
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
+## Observational data considerations
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
+Observational phenological data serve as the primary source for understanding long-term ecological patterns, particularly when experimental approaches are impractical due to temporal and spatial constraints. These datasets, derived from modern systematic observations, provide understanding of climate-biology interactions. However, their inherent limitations necessitate careful consideration to ensure robust and credible findings. Among the key challenges are confounding variables, selection bias, and measurement errors. For instance, in analyzing the relationship between flowering dates and full bloom timing, unmeasured factors such as local microclimate conditions or tree health status can introduce confounding effects. A confounding effect is when a third variable influences both an independent variable and dependent variable in a way that creates a spurious association [@thomas2020].
 
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
-```
+Selection bias, where the sample data is not representative of the population being studied [@tellingstories], manifests in multiple ways within the dataset. While the monitoring network focuses primarily on Somei-Yoshino cherry trees to ensure standardization across observations, geographical constraints necessitate the use of alternative species in certain regions. Specifically, Siberian cherry trees serve as proxies in Hokkaido where Somei-Yoshino is uncommon, while Hikanzakura is observed in the Ryukyu Islands [@jma_faq]. This species variation, though pragmatic for geographical coverage, introduces potential bias as different species may exhibit varying sensitivities to environmental conditions and distinct flowering patterns. This species-based selection bias could limit the model's generalizability to other cherry blossom varieties and potentially affect the accuracy of predictions in regions where alternative species are monitored.
 
-## Diagnostics
-
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
-
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
-
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
-
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
-```
-
-
+Additional sources of selection bias include the systematic underrepresentation of certain geographical areas or time periods in the dataset, limiting generalizability. For instance, Yakushima's monitoring station only provides complete flowering and full bloom data for one out of 67 possible observations [@cookson2020], exemplifying temporal underrepresentation. Furthermore, measurement errors and missing data—common in long-term phenological records—can distort results, necessitating strategies like multiple imputation and data validation [@sterne2009].
 
 \newpage
 
